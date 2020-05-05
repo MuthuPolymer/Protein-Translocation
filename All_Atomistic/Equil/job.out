@@ -1,0 +1,6 @@
+------------- Processor 0 Exiting: Called CmiAbort ------------
+Reason: FATAL ERROR: Couldn't open DCD file ubq_wion_eq.dcd: File exists
+
+Charm++ fatal error:
+FATAL ERROR: Couldn't open DCD file ubq_wion_eq.dcd: File exists
+

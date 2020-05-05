@@ -1,0 +1,59 @@
+###################### Protein Translocation ######################
+clear
+
+#Initialization
+#------------------------------------
+units				lj
+dimension			3
+atom_style			full
+boundary			p p p
+
+#Atom Definition
+#-------------------------------------
+read_data			../data.prot
+
+#Force definition
+#----------------------------------------------
+
+#Pair definition
+dielectric		80
+pair_style		 lj/cut/coul/debye 1.53 1.12 5
+pair_modify 		 shift yes
+pair_coeff	1 1 1 1 1.12 
+pair_coeff	1 2 1 1 1.12 
+pair_coeff	2 2 1 1 1.12 
+
+#Group etc
+#------------------------------------------
+group protein type 1
+group pore type 2
+neigh_modify exclude type 1 1
+neigh_modify exclude type 2 2
+
+#Timestep etc
+#--------------------------------------------
+timestep		0.03
+run_style		verlet
+velocity		protein	create	1	10
+
+#Fix
+#---------------------------------------
+fix 1 protein rigid/nve group 1 protein  langevin 1	1	1	10
+variable rad atom sqrt(x*x+y*y)
+variable rad2 atom (x*x+y*y)
+variable forz atom -0.00333032-2.48216e-19*v_rad+2.65514e-05*v_rad2+9.68155e-21*v_rad2*v_rad-3.31157e-06*v_rad2*v_rad2-2.35103e-22*v_rad2*v_rad2*v_rad+2.42746e-07*v_rad2*v_rad2*v_rad2
+fix 2 protein addforce 0 0 v_forz
+
+#Dump
+#------------------------------------------------
+variable zc equal xcm(protein,z)
+
+thermo_style		 custom step temp press pe evdwl ecoul ke etotal enthalpy v_zc
+thermo 	2000
+dump	3 protein custom 2000 dump.lammpstrj id mol type xu yu zu
+
+#--------Variables etc ---------
+variable pLong equal 84.2105
+variable nLong equal -84.2105
+fix 4 protein efield 0.0 0.0 0.019
+run	2000000000 every 200000 " if '${zc} < ${nLong} || ${zc} > ${pLong}' then quit"

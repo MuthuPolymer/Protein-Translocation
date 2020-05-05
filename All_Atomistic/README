@@ -1,0 +1,2 @@
+The all atomistic simulations were done in NAMD. 
+The input script NO_Field/ubq_ws_eq.conf contains the parameters for running the simulation and the Equil and common folders contains the topology of the different molecules (protein, water and ions).

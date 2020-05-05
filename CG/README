@@ -1,0 +1,4 @@
+The coarse grain simulation of the protein translocation was done using LAMMPS.
+The input script for the protein simulation is RUN_0010/in.prot
+The topology of the system is provided in data.prot
+
