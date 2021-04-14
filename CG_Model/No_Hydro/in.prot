@@ -1,0 +1,60 @@
+###################### Protein Translocation ######################
+clear
+
+#Initialization
+#------------------------------------
+units				lj
+dimension			3
+atom_style			full
+boundary			p p p
+
+#Atom Definition
+#-------------------------------------
+read_data			data.prot
+
+#Force definition
+#----------------------------------------------
+
+#Pair definition
+dielectric		60
+pair_style		 lj/cut/coul/debye 1.768 1.12 2.5
+pair_modify 		 shift yes
+pair_coeff	1 1 1 1 
+pair_coeff	1 2 1 1 
+pair_coeff	2 2 1 1 
+
+#Group etc
+#------------------------------------------
+group protein type 1
+group pore type 2
+neigh_modify exclude type 1 1
+neigh_modify exclude type 2 2
+
+#Timestep etc
+#--------------------------------------------
+timestep		0.02
+run_style		verlet
+velocity		protein create 1 2 
+
+#Fix
+#---------------------------------------
+fix 1 protein  rigid/nve group 1 protein langevin 1.0 1.0 0.020 2 
+fix 3 protein recenter 0.0 0.0 0.0
+run 2000
+unfix 3
+
+
+#Dump
+#------------------------------------------------
+variable zc equal xcm(protein,z)
+
+thermo_style		 custom step temp press pe evdwl ecoul ke etotal enthalpy v_zc
+thermo 	10000
+dump	3 protein custom 10000 dump.lammpstrj id mol type xu yu zu
+
+#--------Variables etc ---------
+variable pLong equal 56.1404
+variable nLong equal -56.1404
+fix 4 protein efield 0.0 0.0 0.019
+run	2000000000 every 100000 " if '${zc} < ${nLong} || ${zc} > ${pLong}' then quit"
+run	2000000000 every 100000 " if '${zc} < ${nLong} || ${zc} > ${pLong}' then quit"
